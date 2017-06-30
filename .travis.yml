@@ -5,6 +5,7 @@ go:
 
 install:
   - go get github.com/GAumala/mpd-http-proxy
+  - go get github.com/stretchr/testify/assert
 
 script:
   - cd $GOPATH/src/github.com/GAumala/mpd-http-proxy/
