@@ -1,0 +1,13 @@
+language: go
+
+go:
+  - 1.8.x
+
+install:
+  - go get github.com/GAumala/mpd-http-proxy
+
+script:
+  - cd $GOPATH/src/github.com/GAumala/mpd-http-proxy/
+  - go build main.go
+  - cd mpd
+  - go test

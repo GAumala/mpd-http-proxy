@@ -1,0 +1,25 @@
+file: Bruno Mars/24K Magic/01 24K Magic.m4a
+Last-Modified: 2016-10-26T13:46:42Z
+Time: 227
+duration: 226.975
+Artist: Bruno Mars
+Album: 24K Magic
+Title: 24K Magic
+Track: 1
+Genre: Pop
+Date: 2016-11-18T08:00:00Z
+Disc: 1
+AlbumArtist: Bruno Mars
+file: Bruno Mars/24K Magic/02 Chunky.m4a
+Last-Modified: 2016-10-26T13:46:42Z
+Time: 187
+duration: 187.037
+Artist: Bruno Mars
+Album: 24K Magic
+Title: Chunky
+Track: 2
+Genre: Pop
+Date: 2016-11-18T08:00:00Z
+Disc: 1
+AlbumArtist: Bruno Mars
+OK
