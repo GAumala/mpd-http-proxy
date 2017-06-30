@@ -74,19 +74,51 @@ func GetAllArtists(conn *net.Conn) {
 func FindArtist(conn *net.Conn, artistquery string) LinkedListSong {
 	writeMPDRequest(conn, "find artist "+artistquery)
 	response := readMPDResponse(*conn)
-	return ParseFindArtistResponse(response)
+	return ParseSongListResponse(response)
 }
 
-// GetCurrentPlaylistInfo Calls mpd command "playlistinfo"
-func GetCurrentPlaylistInfo(conn *net.Conn) {
+// GetCurrentPlaylistInfo Calls mpd command "playlistinfo" and returns a
+// LinkedListSong struct with all the songs in the current playlist
+func GetCurrentPlaylistInfo(conn *net.Conn) LinkedListSong {
 	writeMPDRequest(conn, "playlistinfo")
 	response := readMPDResponse(*conn)
-	fmt.Println(response)
+	return ParseSongListResponse(response)
+}
+
+// AddSongToCurrentPlaylist Calls mpd command "addid" and returns the id
+// of the new song added to the playlist
+func AddSongToCurrentPlaylist(conn *net.Conn, songURI string) string {
+	writeMPDRequest(conn, "addid \""+songURI+"\"")
+	response := readMPDResponse(*conn)
+	return ParseIDResponse(response)
 }
 
 // UpdateCollection Calls mpd command "update" with no additional arguments
 func UpdateCollection(conn *net.Conn) {
 	writeMPDRequest(conn, "update")
-	response := readMPDResponse(*conn)
-	fmt.Println(response)
+	readMPDResponse(*conn)
+}
+
+// StartPlaylist Calls mpd command "play"
+func StartPlaylist(conn *net.Conn) {
+	writeMPDRequest(conn, "play")
+	readMPDResponse(*conn)
+}
+
+// StopPlaylist Calls mpd command "stop"
+func StopPlaylist(conn *net.Conn) {
+	writeMPDRequest(conn, "stop")
+	readMPDResponse(*conn)
+}
+
+// PlayNextPlaylistSong Calls mpd command "next"
+func PlayNextPlaylistSong(conn *net.Conn) {
+	writeMPDRequest(conn, "next")
+	readMPDResponse(*conn)
+}
+
+// PlayPreviousPlaylistSong Calls mpd command "next"
+func PlayPreviousPlaylistSong(conn *net.Conn) {
+	writeMPDRequest(conn, "previous")
+	readMPDResponse(*conn)
 }

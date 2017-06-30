@@ -1,0 +1,31 @@
+file: Los Auténticos Decadentes/Los Reyes de la Cancion/01 Como Me Voy a Olvídar.m4a
+Last-Modified: 2016-10-26T13:44:18Z
+Artist: Los Auténticos Decadentes
+Album: Los Reyes de la Cancion
+Title: Como Me Voy a Olvídar
+Track: 1
+Genre: Música latina
+Date: 1996-12-31T08:00:00Z
+Composer: Jorge Serrano
+Disc: 1
+AlbumArtist: Los Auténticos Decadentes
+Time: 205
+duration: 205.055
+Pos: 0
+Id: 1
+file: Los Auténticos Decadentes/Los Reyes de la Cancion/02 No Puedo.m4a
+Last-Modified: 2016-10-26T13:44:24Z
+Artist: Los Auténticos Decadentes
+Album: Los Reyes de la Cancion
+Title: No Puedo
+Track: 2
+Genre: Música latina
+Date: 1996-12-31T08:00:00Z
+Composer: Jorge Serrano
+Disc: 1
+AlbumArtist: Los Auténticos Decadentes
+Time: 188
+duration: 187.687
+Pos: 1
+Id: 2
+OK

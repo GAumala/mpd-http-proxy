@@ -4,6 +4,7 @@ import "fmt"
 
 // Song is a model for each song returned by mpd's "find" command
 type Song struct {
+	id          string
 	filepath    string
 	title       string
 	album       string
@@ -14,7 +15,7 @@ type Song struct {
 }
 
 func (s Song) String() string {
-	return fmt.Sprintf("{ filepath:\"%s\", title:\"%s\", album:\"%s\", "+
-		"artist:\"%s\", time:\"%s\", trackNumber:\"%s\", genre:\"%s\" }", s.filepath,
-		s.title, s.album, s.artist, s.time, s.trackNumber, s.genre)
+	return fmt.Sprintf("{ id:\"%s\", filepath:\"%s\", title:\"%s\", album:\"%s\", "+
+		"artist:\"%s\", time:\"%s\", trackNumber:\"%s\", genre:\"%s\" }", s.id,
+		s.filepath, s.title, s.album, s.artist, s.time, s.trackNumber, s.genre)
 }

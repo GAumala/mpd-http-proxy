@@ -9,6 +9,7 @@ const albumNameLinePrefix = "Album: "
 const songTitleLinePrefix = "Title: "
 const genreLinePrefix = "Genre: "
 const trackNumberLinePrefix = "Track: "
+const idLinePrefix = "Id: "
 
 func appendSongIfValid(foundSongs LinkedListSong, song *Song) {
 	if len(song.filepath) > 0 {
@@ -19,6 +20,10 @@ func appendSongIfValid(foundSongs LinkedListSong, song *Song) {
 func parseFilepathLine(foundSongs LinkedListSong, currentSong *Song, line string) {
 	appendSongIfValid(foundSongs, currentSong)
 	(*currentSong).filepath = line[len(filePathLinePrefix) : len(line)-1]
+}
+
+func parseIDLine(currentSong *Song, line string) {
+	(*currentSong).id = line[len(idLinePrefix) : len(line)-1]
 }
 
 func parseArtistNameLine(currentSong *Song, line string) {
@@ -45,14 +50,16 @@ func parseTrackNumberLine(currentSong *Song, line string) {
 	(*currentSong).trackNumber = line[len(trackNumberLinePrefix) : len(line)-1]
 }
 
-// ParseFindArtistResponse takes the string response from "find artists" and
+// ParseSongListResponse takes the string response from "find artists" and
 // returns a LinkedListSong struct
-func ParseFindArtistResponse(response LinkedListString) LinkedListSong {
+func ParseSongListResponse(response LinkedListString) LinkedListSong {
 	foundSongs := NewLinkedListSong()
 	currentSong := new(Song)
 	response.ForEach(func(s string) {
 		if strings.HasPrefix(s, filePathLinePrefix) {
 			parseFilepathLine(foundSongs, currentSong, s)
+		} else if strings.HasPrefix(s, idLinePrefix) {
+			parseIDLine(currentSong, s)
 		} else if strings.HasPrefix(s, artistNameLinePrefix) {
 			parseArtistNameLine(currentSong, s)
 		} else if strings.HasPrefix(s, songTitleLinePrefix) {
@@ -69,4 +76,13 @@ func ParseFindArtistResponse(response LinkedListString) LinkedListSong {
 	})
 	appendSongIfValid(foundSongs, currentSong)
 	return foundSongs
+}
+
+// ParseIDResponse takes the string response from "addid" command and
+// returns a string with the id of the added song
+func ParseIDResponse(response LinkedListString) string {
+	firstLine := response.Front()
+	song := new(Song)
+	parseIDLine(song, firstLine)
+	return song.id
 }

@@ -21,7 +21,7 @@ func readTestFile(filename string) LinkedListString {
 
 func TestParseFindArtistResponse(t *testing.T) {
 	response := readTestFile("findArtistResponse1.txt")
-	songs := ParseFindArtistResponse(response)
+	songs := ParseSongListResponse(response)
 
 	expectedSongs := NewLinkedListSong()
 	expectedSongs.PushBack(Song{
@@ -44,4 +44,39 @@ func TestParseFindArtistResponse(t *testing.T) {
 	})
 
 	assert.Equal(t, expectedSongs.list, songs.list, "should parse all songs in the response text file")
+}
+
+func TestGetCurrentPlaylistResponse(t *testing.T) {
+	response := readTestFile("currentPlaylistResponse1.txt")
+	songs := ParseSongListResponse(response)
+
+	expectedSongs := NewLinkedListSong()
+	expectedSongs.PushBack(Song{
+		filepath:    "Los Auténticos Decadentes/Los Reyes de la Cancion/01 Como Me Voy a Olvídar.m4a",
+		time:        "205",
+		artist:      "Los Auténticos Decadentes",
+		album:       "Los Reyes de la Cancion",
+		title:       "Como Me Voy a Olvídar",
+		trackNumber: "1",
+		genre:       "Música latina",
+		id:          "1",
+	})
+	expectedSongs.PushBack(Song{
+		filepath:    "Los Auténticos Decadentes/Los Reyes de la Cancion/02 No Puedo.m4a",
+		time:        "188",
+		artist:      "Los Auténticos Decadentes",
+		album:       "Los Reyes de la Cancion",
+		title:       "No Puedo",
+		trackNumber: "2",
+		genre:       "Música latina",
+		id:          "2",
+	})
+
+	assert.Equal(t, expectedSongs.list, songs.list, "should parse all songs in the response text file")
+}
+
+func TestAddSongToCurrentPlaylistResponse(t *testing.T) {
+	response := readTestFile("addSongToCurrentPlaylistResponse1.txt")
+	id := ParseIDResponse(response)
+	assert.Equal(t, "5", id, "should parse the id number in the response text")
 }
