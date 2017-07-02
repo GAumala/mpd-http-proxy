@@ -10,5 +10,7 @@ install:
 script:
   - cd $GOPATH/src/github.com/GAumala/mpd-http-proxy/
   - go build main.go
-  - cd mpd
-  - go test
+  - cd mpd-cli
+  - go build main.go
+  - cd ../mpd
+  - go test -cover

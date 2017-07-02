@@ -56,22 +56,31 @@ func ParseSongListResponse(response LinkedListString) LinkedListSong {
 	foundSongs := NewLinkedListSong()
 	currentSong := new(Song)
 	response.ForEach(func(s string) {
-		if strings.HasPrefix(s, filePathLinePrefix) {
+		switch {
+		case strings.HasPrefix(s, filePathLinePrefix):
 			parseFilepathLine(foundSongs, currentSong, s)
-		} else if strings.HasPrefix(s, idLinePrefix) {
+			break
+		case strings.HasPrefix(s, idLinePrefix):
 			parseIDLine(currentSong, s)
-		} else if strings.HasPrefix(s, artistNameLinePrefix) {
+			break
+		case strings.HasPrefix(s, artistNameLinePrefix):
 			parseArtistNameLine(currentSong, s)
-		} else if strings.HasPrefix(s, songTitleLinePrefix) {
+			break
+		case strings.HasPrefix(s, songTitleLinePrefix):
 			parseSongTitleLine(currentSong, s)
-		} else if strings.HasPrefix(s, albumNameLinePrefix) {
+			break
+		case strings.HasPrefix(s, albumNameLinePrefix):
 			parseAlbumNameLine(currentSong, s)
-		} else if strings.HasPrefix(s, timeLinePrefix) {
+			break
+		case strings.HasPrefix(s, timeLinePrefix):
 			parseTimeLine(currentSong, s)
-		} else if strings.HasPrefix(s, genreLinePrefix) {
+			break
+		case strings.HasPrefix(s, genreLinePrefix):
 			parseGenreLine(currentSong, s)
-		} else if strings.HasPrefix(s, trackNumberLinePrefix) {
+			break
+		case strings.HasPrefix(s, trackNumberLinePrefix):
 			parseTrackNumberLine(currentSong, s)
+			break
 		}
 	})
 	appendSongIfValid(foundSongs, currentSong)

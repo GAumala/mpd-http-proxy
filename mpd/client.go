@@ -10,7 +10,20 @@ import (
 	"strings"
 )
 
-func readMPDResponse(ioReader io.Reader) LinkedListString {
+// Client is an interface for all mpd clients, implements methods to send
+// requests to the mpd daemon and read responses.
+type Client interface {
+	ReadMPDResponse() LinkedListString
+	WriteMPDRequest(request string)
+}
+
+// TCPClient is a Client implementation that manages a TCP connection to the
+// mpd daemon
+type TCPClient struct {
+	conn net.Conn
+}
+
+func readResponseFromIOReader(ioReader io.Reader) LinkedListString {
 	reader := bufio.NewReader(ioReader)
 	response := NewLinkedListString()
 	for {
@@ -27,98 +40,115 @@ func readMPDResponse(ioReader io.Reader) LinkedListString {
 	}
 }
 
+// ReadMPDResponse reads a mpd response from the TCP connection opened in
+// client and returns a LinkedListString with all the received lines.
+func (client TCPClient) ReadMPDResponse() LinkedListString {
+	return readResponseFromIOReader(client.conn)
+}
+
+// WriteMPDRequest writes a string with a mpd request to the TCP connection
+// opened in client .
+func (client TCPClient) WriteMPDRequest(request string) {
+	fmt.Fprintf(client.conn, request+"\n")
+}
+
 // ConnectToMPD connects to the mpd service running in localhost and returns
 // the connection object
-func ConnectToMPD() *net.Conn {
+func (client *TCPClient) ConnectToMPD() {
 	conn, err := net.Dial("tcp", "127.0.0.1:6600")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	response := readMPDResponse(conn)
+	(*client).conn = conn
+	response := client.ReadMPDResponse()
 	responseString := response.String()
 	if !strings.HasPrefix(responseString, "OK MPD") {
 		mpdError := errors.New("Could not connect to MPD. got: \n" + responseString)
 		log.Fatal(mpdError)
 	}
-
-	return &conn
 }
 
-func writeMPDRequest(conn *net.Conn, request string) {
-	fmt.Fprintf(*conn, request+"\n")
-}
-
-// GetAllSongs Calls mpd command "list" with "title" as type
-func GetAllSongs(conn *net.Conn) {
-	writeMPDRequest(conn, "list title")
-	response := readMPDResponse(*conn)
+// GetAllSongs calls mpd command "list" with "title" as type
+func GetAllSongs(client Client) {
+	client.WriteMPDRequest("list title")
+	response := client.ReadMPDResponse()
 	fmt.Println(response)
 }
 
-// GetAllAlbums Calls mpd command "list" with "album" as type
-func GetAllAlbums(conn *net.Conn) {
-	writeMPDRequest(conn, "list album")
-	response := readMPDResponse(*conn)
+// GetAllAlbums calls mpd command "list" with "album" as type
+func GetAllAlbums(client Client) {
+	client.WriteMPDRequest("list album")
+	response := client.ReadMPDResponse()
 	fmt.Println(response)
 }
 
-// GetAllArtists Calls mpd command "list" with "artist" as type
-func GetAllArtists(conn *net.Conn) {
-	writeMPDRequest(conn, "list artist")
-	response := readMPDResponse(*conn)
+// GetAllArtists calls mpd command "list" with "artist" as type
+func GetAllArtists(client Client) {
+	client.WriteMPDRequest("list artist")
+	response := client.ReadMPDResponse()
 	fmt.Println(response)
 }
 
-// FindArtist Calls mpd command "find" with "artist" as type
-func FindArtist(conn *net.Conn, artistquery string) LinkedListSong {
-	writeMPDRequest(conn, "find artist "+artistquery)
-	response := readMPDResponse(*conn)
+// FindArtist calls mpd command "find" with "artist" as type and returns a
+// LinkedListSong struct with all the songs that match the query
+func FindArtist(client Client, artistquery string) LinkedListSong {
+	client.WriteMPDRequest("find artist \"" + artistquery + "\"")
+	response := client.ReadMPDResponse()
 	return ParseSongListResponse(response)
 }
 
-// GetCurrentPlaylistInfo Calls mpd command "playlistinfo" and returns a
+// GetCurrentPlaylistInfo calls mpd command "playlistinfo" and returns a
 // LinkedListSong struct with all the songs in the current playlist
-func GetCurrentPlaylistInfo(conn *net.Conn) LinkedListSong {
-	writeMPDRequest(conn, "playlistinfo")
-	response := readMPDResponse(*conn)
+func GetCurrentPlaylistInfo(client Client) LinkedListSong {
+	client.WriteMPDRequest("playlistinfo")
+	response := client.ReadMPDResponse()
 	return ParseSongListResponse(response)
 }
 
-// AddSongToCurrentPlaylist Calls mpd command "addid" and returns the id
+// AddSongToCurrentPlaylist calls mpd command "addid" and returns the id
 // of the new song added to the playlist
-func AddSongToCurrentPlaylist(conn *net.Conn, songURI string) string {
-	writeMPDRequest(conn, "addid \""+songURI+"\"")
-	response := readMPDResponse(*conn)
+func AddSongToCurrentPlaylist(client Client, songURI string) string {
+	client.WriteMPDRequest("addid \"" + songURI + "\"")
+	response := client.ReadMPDResponse()
 	return ParseIDResponse(response)
 }
 
-// UpdateCollection Calls mpd command "update" with no additional arguments
-func UpdateCollection(conn *net.Conn) {
-	writeMPDRequest(conn, "update")
-	readMPDResponse(*conn)
+// UpdateCollection calls mpd command "update" with no additional arguments
+func UpdateCollection(client Client) {
+	client.WriteMPDRequest("update")
+	client.ReadMPDResponse()
 }
 
-// StartPlaylist Calls mpd command "play"
-func StartPlaylist(conn *net.Conn) {
-	writeMPDRequest(conn, "play")
-	readMPDResponse(*conn)
+// StartPlaylist calls mpd command "play"
+func StartPlaylist(client Client) {
+	client.WriteMPDRequest("play")
+	client.ReadMPDResponse()
 }
 
-// StopPlaylist Calls mpd command "stop"
-func StopPlaylist(conn *net.Conn) {
-	writeMPDRequest(conn, "stop")
-	readMPDResponse(*conn)
+// StopPlaylist calls mpd command "stop"
+func StopPlaylist(client Client) {
+	client.WriteMPDRequest("stop")
+	client.ReadMPDResponse()
 }
 
-// PlayNextPlaylistSong Calls mpd command "next"
-func PlayNextPlaylistSong(conn *net.Conn) {
-	writeMPDRequest(conn, "next")
-	readMPDResponse(*conn)
+// TogglePlayback calls mpd command "pause 1" if pause is true, otherwise "pause 0"
+func TogglePlayback(client Client, pause bool) {
+	if pause {
+		client.WriteMPDRequest("pause 1")
+	} else {
+		client.WriteMPDRequest("pause 0")
+	}
+	client.ReadMPDResponse()
 }
 
-// PlayPreviousPlaylistSong Calls mpd command "next"
-func PlayPreviousPlaylistSong(conn *net.Conn) {
-	writeMPDRequest(conn, "previous")
-	readMPDResponse(*conn)
+// PlayNextPlaylistSong calls mpd command "next"
+func PlayNextPlaylistSong(client Client) {
+	client.WriteMPDRequest("next")
+	client.ReadMPDResponse()
+}
+
+// PlayPreviousPlaylistSong calls mpd command "next"
+func PlayPreviousPlaylistSong(client Client) {
+	client.WriteMPDRequest("previous")
+	client.ReadMPDResponse()
 }

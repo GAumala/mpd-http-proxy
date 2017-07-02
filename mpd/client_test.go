@@ -8,20 +8,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func readTestFile(filename string) LinkedListString {
-	path := path.Join(os.Getenv("GOPATH"), "src/github.com/GAumala/mpd-http-proxy/mpd/testData/", filename)
+var lastWrittenRequest = ""
+
+type fileClient struct {
+	filename string
+}
+
+func (client fileClient) ReadMPDResponse() LinkedListString {
+	path := path.Join(os.Getenv("GOPATH"),
+		"src/github.com/GAumala/mpd-http-proxy/mpd/testData/", client.filename)
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
-	contents := readMPDResponse(file)
+	contents := readResponseFromIOReader(file)
 	file.Close()
 	return contents
 }
 
-func TestParseFindArtistResponse(t *testing.T) {
-	response := readTestFile("findArtistResponse1.txt")
-	songs := ParseSongListResponse(response)
+func (client fileClient) WriteMPDRequest(request string) {
+	lastWrittenRequest = request
+}
+
+func TestFindArtist(t *testing.T) {
+	client := fileClient{filename: "findArtistResponse1.txt"}
+	songs := FindArtist(client, "Bruno Mars")
+
+	assert.Equal(t, "find artist \"Bruno Mars\"", lastWrittenRequest,
+		"should write the correct find artist request")
 
 	expectedSongs := NewLinkedListSong()
 	expectedSongs.PushBack(Song{
@@ -47,8 +61,11 @@ func TestParseFindArtistResponse(t *testing.T) {
 }
 
 func TestGetCurrentPlaylistResponse(t *testing.T) {
-	response := readTestFile("currentPlaylistResponse1.txt")
-	songs := ParseSongListResponse(response)
+	client := fileClient{filename: "currentPlaylistResponse1.txt"}
+	songs := GetCurrentPlaylistInfo(client)
+
+	assert.Equal(t, "playlistinfo", lastWrittenRequest,
+		"should write the correct playlistinfo request")
 
 	expectedSongs := NewLinkedListSong()
 	expectedSongs.PushBack(Song{
@@ -72,11 +89,15 @@ func TestGetCurrentPlaylistResponse(t *testing.T) {
 		id:          "2",
 	})
 
-	assert.Equal(t, expectedSongs.list, songs.list, "should parse all songs in the response text file")
+	assert.Equal(t, expectedSongs.list, songs.list,
+		"should parse all songs in the response text file")
 }
 
 func TestAddSongToCurrentPlaylistResponse(t *testing.T) {
-	response := readTestFile("addSongToCurrentPlaylistResponse1.txt")
-	id := ParseIDResponse(response)
+	client := fileClient{filename: "addSongToCurrentPlaylistResponse1.txt"}
+	id := AddSongToCurrentPlaylist(client, "path/to/song.ogg")
+
+	assert.Equal(t, "addid \"path/to/song.ogg\"", lastWrittenRequest,
+		"should write the correct addid request")
 	assert.Equal(t, "5", id, "should parse the id number in the response text")
 }
